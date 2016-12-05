@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+
+    <style>
+        h2 {
+            text-align: center;
+            color: black;
+        }
+        
+        body {
+            width: 960px;
+            margin: 0 auto;
+        }
+    </style>
+
+    <script type="text/javascript">
+        function draw(data) {
+
+            /*
+              D3.js setup code
+            */
+            "use strict";
+            var margin = 75,
+                width = 1200 - margin,
+                height = 550 - margin;
+            d3.select("body")
+                .append("h2")
+                .text("Titanic Passenger Survival by Class")
+                .style('color', 'black')
+                .style('backgroud-color', 'white');
+
+            var svg = d3.select("body")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append('g')
+                .attr('class', 'chart');
+
+            svg.selectAll("explanatory_text")
+                .data(["In the infamous Titanic shipwreck on April 15, 1912, 1502 out of 2224 passengers and crew perished. ", "Investigating a dataset with information on 891 passengers shows that", "people in higher classes have a better chance of survival than people in lower classes."])
+                .enter()
+                .append("text")
+                .attr("x", 5)
+                .attr("y", function(d, i) {
+                    return 30 + i * 16;
+                })
+                .style("font-size", "14px")
+                .style("color", "Black")
+                .style("font-family", "sans-serif")
+                .text(function(d) {
+                    return d;
+                });
+        /*
+        Dimple code
+        */
+            // create chart
+            var myChart = new dimple.chart(svg, data);
+            myChart.setBounds(80, 100, width - 400, height - 200);
+            var y = myChart.addMeasureAxis("y", "var");
+            data.forEach(function(d) {
+                d['var'] = d['Count'];
+            });
+            var label = 'Count';
+            y.title = label;
+            var myAxis = myChart.addCategoryAxis("x", ["Class", 'Survived']);
+            myAxis.title = "Passenger Class";
+            myAxis.addOrderRule(['Lower Class', 'Middle Class', 'Upper Class']);
+
+            // assign colors
+            myChart.assignColor("0", "#808080");
+            myChart.assignColor("1", "#ffcc99");
+            
+            // add series and legend
+            var mySeries = myChart.addSeries('Survived', dimple.plot.bar);
+            var myLegend = myChart.addLegend(800, 120, 100, 100, "right");
+
+            // set legend
+            myLegend._getEntries = function() {
+                var orderedValues = ["0", "1"];
+                var newNames = {
+                    "0": "Perished",
+                    "1": "Survived"
+                };
+                var entries = [];
+                orderedValues.forEach(function(v) {
+                    entries.push({
+                        key: newNames[v],
+                        fill: myChart.getColor(v).fill,
+                        stroke: myChart.getColor(v).stroke,
+                        opacity: myChart.getColor(v).opacity,
+                        series: [mySeries],
+                        aggField: [v]
+                    });
+                }, this);
+                return entries;
+            };
+            myChart.draw();
+
+            myChart.legends = [];
+            svg.selectAll('title_text')
+                .data(["Click legend to select group"])
+                .enter()
+                .append('text')
+                .attr('x', 750)
+                .attr('y', 110)
+                .text(function(d) {
+                    return d;
+                });
+
+            // set legend filtering
+            var filterValues = dimple.getUniqueValues(data, "Survived");
+            myLegend.shapes.selectAll("rect")
+                .on("click", function(e) {
+                    var hide = false;
+                    var newFilters = [];
+                    filterValues.forEach(function(f) {
+                        if (f === e.aggField[0]) {
+
+                            hide = true;
+                        } else {
+                            newFilters.push(f);
+                        }
+
+                    });
+                    // hide/show legend
+                    if (hide) {
+                        d3.select(this).style("opacity", 0.2);
+                    } else {
+                        newFilters.push(e.aggField[0]);
+                        d3.select(this).style("opacity", 0.8);
+                    }
+                    // update legend filter
+                    filterValues = newFilters;
+                    myChart.data = dimple.filterData(data, "Survived", filterValues);
+                    myChart.draw(800);
+                });
+
+
+        };
+    </script>
+</head>
+
+<body>
+
+    <script type="text/javascript">
+        /*
+            Use D3 (not dimple.js) to load the CSVfile
+            and pass the contents of it to the draw function
+            */
+        d3.csv("titanic_class.csv", draw);
+    </script>
+</body>
+
+</html>
