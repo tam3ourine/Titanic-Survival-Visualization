@@ -1,3 +1,5 @@
+*Visualization can be viewed at: http://bl.ocks.org/tam3ourine/12653b758a006ee4461d0b1ee5f2142c.
+
 ### Summary 
 Titanic data shows that people of higher classes had a higher likelihood of survival than people of lower classes. This may be due to various reasons such as passengers of lower classes being farther away from the boat deck, confined by locked gates, and not speaking English well enough to find help. The upper class comprised of social elites who paid between £30 and £870, middle class comprised of mostly tourists who paid on average £13, and lower class comprised of mostly emigrants who paid on average £7.
 
